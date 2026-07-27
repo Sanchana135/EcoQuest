@@ -1,0 +1,30 @@
+name: EcoQuest Continuous Integration (CI)
+
+on:
+  push:
+    branches: [ main, master, develop ]
+  pull_request:
+    branches: [ main, master, develop ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Monorepo Dependencies
+        run: npm ci
+
+      - name: Push Prisma Schema
+        run: npm --prefix apps/backend run prisma:push -- --accept-data-loss
+
+      - name: Build Monorepo Workspaces
+        run: npm run build

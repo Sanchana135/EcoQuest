@@ -1,0 +1,37 @@
+{
+  "app": {
+    "name": "EcoQuest",
+    "tagline": "Empowering the Next Generation of Climate Leaders"
+  },
+  "auth": {
+    "loginTitle": "Sign in to EcoQuest",
+    "loginSubtitle": "Access your environmental quest dashboard",
+    "emailLabel": "Email address",
+    "passwordLabel": "Password",
+    "signInBtn": "Sign In",
+    "demoAccounts": "Quick Demo Sign-In",
+    "studentRole": "Student",
+    "teacherRole": "Teacher",
+    "adminRole": "Inst. Admin",
+    "superAdminRole": "Super Admin"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "modules": "Learning Modules",
+    "quizzes": "Quizzes",
+    "challenges": "Eco-Missions",
+    "leaderboard": "Leaderboard",
+    "classes": "My Classes",
+    "users": "User Directory",
+    "settings": "Institution Settings",
+    "profile": "My Profile",
+    "logout": "Sign Out"
+  },
+  "dashboards": {
+    "welcome": "Welcome back",
+    "studentSubtitle": "Continue your quests and protect the planet today!",
+    "teacherSubtitle": "Monitor class environmental literacy and assign new quests.",
+    "adminSubtitle": "Manage institution metrics, users, and sustainability impact.",
+    "superAdminSubtitle": "Platform-wide health and multi-tenant management."
+  }
+}

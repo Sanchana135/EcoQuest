@@ -1,0 +1,214 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             String    @id @default(uuid())
+  email          String    @unique
+  passwordHash   String
+  firstName      String
+  lastName       String
+  role           String    @default("STUDENT") // ADMIN, TEACHER, STUDENT, PARENT
+  avatarUrl      String?
+  level          Int       @default(1)
+  xp             Int       @default(0)
+  streakDays     Int       @default(0)
+  lastActiveDate DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  taughtClasses  Class[]           @relation("TeacherClasses")
+  enrollments    ClassEnrollment[]
+  quizAttempts   QuizAttempt[]
+  xpTransactions XPTransaction[]
+  userBadges     UserBadge[]
+  aiLogs         AiInteractionLog[]
+  userEcoTips    UserEcoTip[]
+  certificates   Certificate[]
+  notifications  Notification[]
+}
+
+model Class {
+  id         String   @id @default(uuid())
+  name       String
+  code       String   @unique
+  gradeLevel String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  teacherId   String
+  teacher     User              @relation("TeacherClasses", fields: [teacherId], references: [id])
+  enrollments ClassEnrollment[]
+}
+
+model ClassEnrollment {
+  id         String   @id @default(uuid())
+  enrolledAt DateTime @default(now())
+
+  classId   String
+  class     Class  @relation(fields: [classId], references: [id], onDelete: Cascade)
+  studentId String
+  student   User   @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([classId, studentId])
+}
+
+model Module {
+  id          String   @id @default(uuid())
+  title       String
+  description String
+  category    String   // Climate Change, Waste Management, Renewable Energy, Biodiversity
+  imageUrl    String?
+  isPublished Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  lessons Lesson[]
+  quizzes Quiz[]
+}
+
+model Lesson {
+  id         String   @id @default(uuid())
+  title      String
+  content    String
+  imageUrl   String?
+  videoUrl   String?
+  orderIndex Int      @default(0)
+  createdAt  DateTime @default(now())
+
+  moduleId String
+  module   Module @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+}
+
+model Quiz {
+  id           String   @id @default(uuid())
+  title        String
+  timeLimitSec Int      @default(300)
+  createdAt    DateTime @default(now())
+
+  moduleId String
+  module   Module @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+
+  questions Question[]
+  attempts  QuizAttempt[]
+}
+
+model Question {
+  id            String  @id @default(uuid())
+  text          String
+  type          String  @default("MCQ")
+  optionsJson   String  // JSON stringified array of options
+  correctOption String  // The correct option text
+  explanation   String?
+  points        Int     @default(10)
+
+  quizId String
+  quiz   Quiz   @relation(fields: [quizId], references: [id], onDelete: Cascade)
+}
+
+model QuizAttempt {
+  id          String   @id @default(uuid())
+  score       Int
+  maxScore    Int
+  percentage  Float    @default(0.0)
+  passed      Boolean  @default(false)
+  answersJson String   @default("[]") // Saved JSON of student selections
+  completedAt DateTime @default(now())
+
+  quizId String
+  quiz   Quiz   @relation(fields: [quizId], references: [id], onDelete: Cascade)
+
+  studentId String
+  student   User   @relation(fields: [studentId], references: [id], onDelete: Cascade)
+}
+
+model XPTransaction {
+  id          String   @id @default(uuid())
+  amount      Int
+  reason      String
+  idempotency String   @unique
+  createdAt   DateTime @default(now())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Badge {
+  id          String   @id @default(uuid())
+  code        String   @unique
+  name        String
+  description String
+  iconUrl     String
+  category    String   @default("ACHIEVEMENT")
+
+  userBadges UserBadge[]
+}
+
+model UserBadge {
+  id         String   @id @default(uuid())
+  unlockedAt DateTime @default(now())
+
+  userId  String
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  badgeId String
+  badge   Badge  @relation(fields: [badgeId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, badgeId])
+}
+
+model AiInteractionLog {
+  id        String   @id @default(uuid())
+  prompt    String
+  response  String
+  createdAt DateTime @default(now())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model EcoTip {
+  id                String   @id @default(uuid())
+  category          String
+  tipText           String
+  impactDescription String
+  createdAt         DateTime @default(now())
+
+  userEcoTips UserEcoTip[]
+}
+
+model UserEcoTip {
+  id       String   @id @default(uuid())
+  viewedAt DateTime @default(now())
+
+  userId   String
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  ecoTipId String
+  ecoTip   EcoTip @relation(fields: [ecoTipId], references: [id], onDelete: Cascade)
+}
+
+model Certificate {
+  id        String   @id @default(uuid())
+  code      String   @unique
+  title     String
+  issuedAt  DateTime @default(now())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  title     String
+  message   String
+  type      String   @default("INFO") // QUIZ_COMPLETED, BADGE_UNLOCKED, CERTIFICATE_EARNED, GENERAL
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+}

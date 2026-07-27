@@ -1,0 +1,11 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const ai_controller_1 = require("./ai.controller");
+const authGuard_1 = require("../../common/guards/authGuard");
+const router = (0, express_1.Router)();
+router.post('/chat', authGuard_1.authenticateJwt, ai_controller_1.AiController.chat);
+router.get('/recommendations', authGuard_1.authenticateJwt, ai_controller_1.AiController.getRecommendations);
+router.get('/daily-tip', authGuard_1.authenticateJwt, ai_controller_1.AiController.getDailyTip);
+router.get('/performance-analysis', authGuard_1.authenticateJwt, ai_controller_1.AiController.getPerformanceAnalysis);
+exports.default = router;

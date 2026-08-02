@@ -1,0 +1,87 @@
+/* EcoQuest Responsive Breakpoints & Mobile Optimization */
+
+@media (max-width: 1024px) {
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .col-8, .col-4, .col-6 {
+        grid-column: span 12;
+    }
+
+    .level-banner {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .level-info {
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 768px) {
+    .navbar {
+        padding: 0.75rem 1rem;
+    }
+
+    .nav-links {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: var(--bg-secondary);
+        flex-direction: column;
+        padding: 1rem;
+        border-bottom: 1px solid var(--glass-border);
+    }
+
+    .nav-links.active {
+        display: flex;
+    }
+
+    .mobile-menu-toggle {
+        display: flex !important;
+    }
+
+    .main-wrapper {
+        padding: 1.25rem 1rem;
+    }
+
+    .glass-card {
+        padding: 1.25rem;
+    }
+
+    .stat-card {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .certificate-frame {
+        padding: 1.5rem;
+    }
+
+    .cert-header h2 {
+        font-size: 1.75rem;
+    }
+
+    .cert-name {
+        font-size: 1.5rem;
+    }
+
+    .cert-footer {
+        flex-direction: column;
+        align-items: center;
+        gap: 1.5rem;
+        text-align: center;
+    }
+}
+
+.mobile-menu-toggle {
+    display: none;
+    background: transparent;
+    border: none;
+    color: var(--text-primary);
+    font-size: 1.5rem;
+    cursor: pointer;
+}

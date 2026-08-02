@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile Settings – EcoQuest</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/responsive.css') }}">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="{{ url_for('index') }}" class="logo"><i class="fa-solid fa-leaf"></i> EcoQuest</a>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="{{ url_for('dashboard') }}" class="nav-link">Dashboard</a></li>
+                <li><a href="{{ url_for('modules') }}" class="nav-link">Modules</a></li>
+                <li><a href="{{ url_for('leaderboard') }}" class="nav-link">Leaderboard</a></li>
+                <li><a href="{{ url_for('profile') }}" class="nav-link active">Profile</a></li>
+            </ul>
+            <div class="nav-actions">
+                <button class="theme-toggle-btn" id="themeToggleBtn"><i class="fa-solid fa-sun" id="themeIcon"></i></button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="main-wrapper">
+        <div style="max-width: 700px; margin: 0 auto;">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div class="alert-container">
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }}"><i class="fa-solid fa-circle-info"></i> {{ message }}</div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+
+            <div class="glass-card" style="padding: 2.5rem; margin-bottom: 2rem;">
+                <div style="display: flex; align-items: center; gap: 1.5rem; margin-bottom: 2rem; border-bottom: 1px solid var(--glass-border); padding-bottom: 1.5rem;">
+                    <div style="width: 80px; height: 80px; border-radius: 50%; background: var(--accent-gradient); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 2.2rem; box-shadow: 0 0 25px var(--accent-glow);">
+                        <i class="fa-solid {{ user.avatar }}"></i>
+                    </div>
+                    <div>
+                        <h2>{{ user.username }}</h2>
+                        <div style="display: flex; gap: 0.5rem; align-items: center; margin-top: 0.25rem;">
+                            <span class="badge-pill badge-emerald">Level {{ user.level }}</span>
+                            <span class="badge-pill badge-ocean">{{ user.xp }} XP</span>
+                        </div>
+                    </div>
+                </div>
+
+                <form action="{{ url_for('profile') }}" method="POST">
+                    <h3 style="margin-bottom: 1.25rem;">Customize Avatar</h3>
+                    <div style="display: flex; gap: 1rem; margin-bottom: 1.75rem; flex-wrap: wrap;">
+                        {% for av in avatars %}
+                            <label style="cursor: pointer; text-align: center;">
+                                <input type="radio" name="avatar" value="{{ av }}" {% if user.avatar == av %}checked{% endif %} style="display: none;">
+                                <div style="width: 50px; height: 50px; border-radius: 50%; background: rgba(255,255,255,0.08); border: 2px solid {% if user.avatar == av %}var(--emerald-primary){% else %}var(--glass-border){% endif %}; display: flex; align-items: center; justify-content: center; color: var(--text-primary); font-size: 1.3rem; transition: var(--transition);">
+                                    <i class="fa-solid {{ av }}"></i>
+                                </div>
+                            </label>
+                        {% endfor %}
+                    </div>
+
+                    <div style="margin-bottom: 1.25rem;">
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--text-secondary);">Email Address</label>
+                        <input type="email" name="email" value="{{ user.email }}" required style="width: 100%; padding: 0.85rem 1rem; background: rgba(255,255,255,0.06); border: 1px solid var(--glass-border); border-radius: var(--radius-md); color: var(--text-primary); font-size: 1rem;">
+                    </div>
+
+                    <div style="margin-bottom: 1.75rem;">
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--text-secondary);">New Password (leave blank to keep current)</label>
+                        <input type="password" name="new_password" placeholder="••••••••" style="width: 100%; padding: 0.85rem 1rem; background: rgba(255,255,255,0.06); border: 1px solid var(--glass-border); border-radius: var(--radius-md); color: var(--text-primary); font-size: 1rem;">
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" style="padding: 0.85rem 2rem;">
+                        <i class="fa-solid fa-floppy-disk"></i> Save Profile Changes
+                    </button>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>

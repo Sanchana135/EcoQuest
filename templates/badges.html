@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Achievement Badges – EcoQuest</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/responsive.css') }}">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="{{ url_for('index') }}" class="logo"><i class="fa-solid fa-leaf"></i> EcoQuest</a>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="{{ url_for('dashboard') }}" class="nav-link">Dashboard</a></li>
+                <li><a href="{{ url_for('modules') }}" class="nav-link">Modules</a></li>
+                <li><a href="{{ url_for('leaderboard') }}" class="nav-link">Leaderboard</a></li>
+                <li><a href="{{ url_for('badges') }}" class="nav-link active">Badges</a></li>
+                <li><a href="{{ url_for('eco_tips') }}" class="nav-link">Eco Tips</a></li>
+            </ul>
+            <div class="nav-actions">
+                <button class="theme-toggle-btn" id="themeToggleBtn"><i class="fa-solid fa-sun" id="themeIcon"></i></button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="main-wrapper">
+        <div style="margin-bottom: 2rem; text-align: center;">
+            <span class="badge-pill badge-emerald">Gamified Milestones</span>
+            <h1 style="font-size: 2.5rem; margin-top: 0.5rem;">Trophies & Badges Showcase</h1>
+            <p style="color: var(--text-secondary);">Unlock badges by completing environmental quizzes, scoring 100%, and earning XP.</p>
+        </div>
+
+        <div class="badges-grid">
+            {% for item in badges %}
+                {% set b = item.badge %}
+                <div class="glass-card badge-card {% if not item.is_earned %}locked{% endif %}">
+                    <div class="badge-icon-box">
+                        <i class="fa-solid {{ b.icon_class }}"></i>
+                    </div>
+                    <h3 style="font-size: 1.2rem; margin-bottom: 0.4rem;">{{ b.name }}</h3>
+                    <p style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5; margin-bottom: 1rem;">
+                        {{ b.description }}
+                    </p>
+
+                    {% if item.is_earned %}
+                        <span class="badge-pill badge-emerald"><i class="fa-solid fa-circle-check"></i> Unlocked</span>
+                    {% else %}
+                        <span class="badge-pill" style="background: rgba(255,255,255,0.06); color: var(--text-muted); border: 1px solid var(--glass-border);">
+                            <i class="fa-solid fa-lock"></i> Locked
+                        </span>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+    </main>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard – EcoQuest</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/responsive.css') }}">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="{{ url_for('index') }}" class="logo">
+                <i class="fa-solid fa-leaf"></i> EcoQuest
+            </a>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="{{ url_for('dashboard') }}" class="nav-link active">Dashboard</a></li>
+                <li><a href="{{ url_for('modules') }}" class="nav-link">Modules</a></li>
+                <li><a href="{{ url_for('leaderboard') }}" class="nav-link">Leaderboard</a></li>
+                <li><a href="{{ url_for('badges') }}" class="nav-link">Badges</a></li>
+                <li><a href="{{ url_for('eco_tips') }}" class="nav-link">Eco Tips</a></li>
+                <li><a href="{{ url_for('profile') }}" class="nav-link">Profile</a></li>
+            </ul>
+            <div class="nav-actions">
+                <span class="badge-pill badge-streak"><i class="fa-solid fa-fire"></i> {{ user.streak_count or 1 }}d</span>
+                <span class="badge-pill badge-coin"><i class="fa-solid fa-coins"></i> <span class="userCoinVal">{{ user.coins or 50 }}</span></span>
+
+                <button class="theme-toggle-btn" id="themeToggleBtn"><i class="fa-solid fa-sun" id="themeIcon"></i></button>
+                <a href="{{ url_for('logout') }}" class="btn btn-secondary" style="padding: 0.5rem 1rem;"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+                <button class="mobile-menu-toggle" id="mobileMenuBtn"><i class="fa-solid fa-bars"></i></button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="main-wrapper">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="alert-container">
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}"><i class="fa-solid fa-circle-info"></i> {{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <!-- Level & Gamification Banner -->
+        <section class="level-banner" style="margin-bottom: 2rem;">
+            <div class="level-info">
+                <div class="level-badge-large">
+                    <span>LEVEL</span>
+                    <strong id="userLevelVal">{{ user.level }}</strong>
+                </div>
+                <div>
+                    <h2 style="font-size: 1.8rem; margin-bottom: 0.25rem;">Welcome back, {{ user.username }}!</h2>
+                    <div style="display: flex; gap: 0.75rem; align-items: center; margin-top: 0.4rem;">
+                        <span class="badge-pill badge-streak"><i class="fa-solid fa-fire"></i> {{ user.streak_count or 1 }} Day Streak</span>
+                        <span class="badge-pill badge-coin"><i class="fa-solid fa-coins"></i> <span class="userCoinVal">{{ user.coins or 50 }}</span> EcoCoins</span>
+                    </div>
+                </div>
+            </div>
+            <div class="level-progress-container" style="max-width: 420px; width: 100%;">
+                <div style="display: flex; justify-content: space-between; font-weight: 600; font-size: 0.9rem;">
+                    <span>Level {{ user.level }} Progress</span>
+                    <span><strong id="userXpVal" style="color: var(--emerald-primary);">{{ user.xp }}</strong> / {{ next_threshold }} XP</span>
+                </div>
+                <div class="xp-bar-bg">
+                    <div class="xp-bar-fill" style="width: {{ xp_percentage }}%;"></div>
+                </div>
+                <div style="font-size: 0.8rem; color: var(--text-muted); text-align: right;">
+                    {% if user.level < 10 %}
+                        {{ next_threshold - user.xp }} XP to Level {{ user.level + 1 }}
+                    {% else %}
+                        MAX LEVEL REACHED! 🏆
+                    {% endif %}
+                </div>
+            </div>
+        </section>
+
+        <!-- Daily Login Reward Card -->
+        <section style="margin-bottom: 2rem;">
+            <div class="glass-card" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1.5rem; background: linear-gradient(135deg, rgba(245, 158, 11, 0.12), rgba(28, 37, 65, 0.8)); border: 1px solid rgba(245, 158, 11, 0.3);">
+                <div style="display: flex; align-items: center; gap: 1.25rem;">
+                    <div style="width: 60px; height: 60px; border-radius: 50%; background: var(--gold-gradient); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 1.75rem; box-shadow: 0 0 20px rgba(245, 158, 11, 0.4);">
+                        <i class="fa-solid fa-gift"></i>
+                    </div>
+                    <div>
+                        <span class="badge-pill badge-coin" style="margin-bottom: 0.3rem;">Daily Bonus</span>
+                        <h3 style="font-size: 1.2rem;">Claim Daily Login Reward</h3>
+                        <p style="color: var(--text-secondary); font-size: 0.9rem;">Log in every day to claim +50 XP and +25 EcoCoins!</p>
+                    </div>
+                </div>
+                <div>
+                    {% if user.daily_reward_claimed %}
+                        <button class="btn btn-secondary btn-sm" disabled style="padding: 0.7rem 1.5rem;">
+                            <i class="fa-solid fa-circle-check"></i> Claimed Today
+                        </button>
+                    {% else %}
+                        <button class="btn btn-gold" id="claimDailyRewardBtn" style="padding: 0.75rem 1.75rem;">
+                            <i class="fa-solid fa-gift"></i> Claim +50 XP & +25 Coins
+                        </button>
+                    {% endif %}
+                </div>
+            </div>
+        </section>
+
+        <!-- Daily Mission Cards -->
+        <section style="margin-bottom: 2.5rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+                <h3><i class="fa-solid fa-bullseye" style="color: var(--emerald-primary);"></i> Daily Missions</h3>
+                <span style="font-size: 0.85rem; color: var(--text-secondary);">Reset daily</span>
+            </div>
+            <div class="missions-grid">
+                {% for item in missions_list %}
+                    {% set m = item.mission %}
+                    <div class="mission-card">
+                        <div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                                <div style="display: flex; align-items: center; gap: 0.6rem;">
+                                    <i class="fa-solid {{ m.icon_class }}" style="color: var(--emerald-primary); font-size: 1.1rem;"></i>
+                                    <strong style="font-size: 1rem;">{{ m.title }}</strong>
+                                </div>
+                                <span class="badge-pill badge-coin">+{{ m.coin_reward }} 🪙</span>
+                            </div>
+                            <p style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.4; margin-bottom: 0.6rem;">{{ m.description }}</p>
+                        </div>
+
+                        <div>
+                            <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-muted);">
+                                <span>Progress</span>
+                                <span>{{ item.progress }} / {{ m.target_count }}</span>
+                            </div>
+                            <div class="mission-progress-bg">
+                                <div class="mission-progress-fill" style="width: {{ (item.progress / m.target_count * 100) | int }}%;"></div>
+                            </div>
+                            
+                            {% if item.claimed %}
+                                <button class="btn btn-secondary btn-sm" disabled style="width: 100%; margin-top: 0.5rem; font-size: 0.8rem;">
+                                    <i class="fa-solid fa-check"></i> Claimed
+                                </button>
+                            {% elif item.completed %}
+                                <button class="btn btn-gold btn-sm claim-mission-btn" data-mission-id="{{ m.id }}" style="width: 100%; margin-top: 0.5rem; font-size: 0.8rem;">
+                                    <i class="fa-solid fa-gift"></i> Claim Reward
+                                </button>
+                            {% else %}
+                                <button class="btn btn-secondary btn-sm" disabled style="width: 100%; margin-top: 0.5rem; font-size: 0.8rem; opacity: 0.6;">
+                                    In Progress
+                                </button>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </section>
+
+        <!-- Stats Overview Cards -->
+        <section class="dashboard-grid" style="margin-bottom: 2rem;">
+            <div class="col-6">
+                <div class="glass-card stat-card">
+                    <div class="stat-icon"><i class="fa-solid fa-list-check"></i></div>
+                    <div>
+                        <div class="stat-value">{{ passed_quizzes }} / {{ total_quizzes }}</div>
+                        <div class="stat-label">Quizzes Passed</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6">
+                <div class="glass-card stat-card">
+                    <div class="stat-icon" style="background: rgba(245, 158, 11, 0.15); color: var(--warning);">
+                        <i class="fa-solid fa-award"></i>
+                    </div>
+                    <div>
+                        <div class="stat-value">{{ earned_badges_count }}</div>
+                        <div class="stat-label">Badges Unlocked</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Main Dashboard Content Grid -->
+        <section class="dashboard-grid">
+            <!-- Left Column: Recent Quiz Performance & Daily Tip -->
+            <div class="col-8">
+                <!-- Daily Eco Tip Widget -->
+                {% if daily_tip %}
+                    <div class="glass-card" style="margin-bottom: 1.5rem; background: linear-gradient(135deg, rgba(16, 185, 129, 0.12), rgba(28, 37, 65, 0.8));">
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
+                            <span class="badge-pill badge-emerald"><i class="fa-solid fa-lightbulb"></i> Daily Eco Tip</span>
+                            <div style="display: flex; gap: 0.5rem;">
+                                <span style="font-size: 0.85rem; color: var(--emerald-primary); font-weight: 700;">+{{ daily_tip.xp_reward }} XP</span>
+                                <span style="font-size: 0.85rem; color: var(--gold-coin); font-weight: 700;">+{{ daily_tip.coin_reward or 10 }} Coins</span>
+                            </div>
+                        </div>
+                        <h3 style="font-size: 1.25rem; margin-bottom: 0.5rem;">{{ daily_tip.title }}</h3>
+                        <p style="color: var(--text-secondary); line-height: 1.6; margin-bottom: 1.25rem; font-size: 0.95rem;">{{ daily_tip.content }}</p>
+                        <button class="btn btn-primary claim-tip-btn" data-tip-id="{{ daily_tip.id }}" style="padding: 0.5rem 1.25rem; font-size: 0.9rem;">
+                            <i class="fa-solid fa-check"></i> Complete Action & Claim Rewards
+                        </button>
+                    </div>
+                {% endif %}
+
+                <!-- Recent Quizzes -->
+                <div class="glass-card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+                        <h3>Recent Quiz Attempts</h3>
+                        <a href="{{ url_for('modules') }}" class="btn btn-secondary" style="padding: 0.4rem 1rem; font-size: 0.85rem;">Browse Modules</a>
+                    </div>
+                    {% if recent_quizzes %}
+                        <div style="overflow-x: auto;">
+                            <table class="leaderboard-table">
+                                <thead>
+                                    <tr>
+                                        <th>Module / Quiz</th>
+                                        <th>Score</th>
+                                        <th>Status</th>
+                                        <th>XP & Coins</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for q in recent_quizzes %}
+                                        <tr>
+                                            <td>
+                                                <div style="font-weight: 600;">{{ q.quiz_title }}</div>
+                                                <div style="font-size: 0.8rem; color: var(--text-muted);">{{ q.module_title }}</div>
+                                            </td>
+                                            <td><strong style="color: var(--text-primary);">{{ q.percentage }}%</strong></td>
+                                            <td>
+                                                {% if q.passed %}
+                                                    <span class="badge-pill badge-emerald">PASSED</span>
+                                                {% else %}
+                                                    <span class="badge-pill" style="background: rgba(239, 68, 68, 0.2); color: var(--danger);">FAILED</span>
+                                                {% endif %}
+                                            </td>
+                                            <td style="font-weight: 700;">
+                                                <span style="color: var(--emerald-primary);">+{{ q.xp_earned }} XP</span>
+                                            </td>
+                                            <td>
+                                                <a href="{{ url_for('result', result_id=q.id) }}" class="btn btn-secondary" style="padding: 0.3rem 0.75rem; font-size: 0.8rem;">Review</a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div style="text-align: center; padding: 2rem; color: var(--text-muted);">
+                            <i class="fa-solid fa-clipboard-question" style="font-size: 2.5rem; margin-bottom: 0.75rem;"></i>
+                            <p>No quizzes attempted yet. Head over to the <a href="{{ url_for('modules') }}">Modules page</a> to get started!</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Right Column: Recent Badges & Shortcuts -->
+            <div class="col-4">
+                <div class="glass-card" style="margin-bottom: 1.5rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+                        <h3>Earned Badges</h3>
+                        <a href="{{ url_for('badges') }}" style="font-size: 0.85rem; font-weight: 600;">View All</a>
+                    </div>
+                    {% if recent_badges %}
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;">
+                            {% for b in recent_badges %}
+                                <div style="text-align: center; background: rgba(255,255,255,0.04); padding: 1rem; border-radius: var(--radius-md); border: 1px solid var(--glass-border);">
+                                    <div style="width: 50px; height: 50px; border-radius: 50%; background: var(--accent-gradient); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 1.3rem; margin: 0 auto 0.5rem; box-shadow: 0 0 15px var(--accent-glow);">
+                                        <i class="fa-solid {{ b.icon_class }}"></i>
+                                    </div>
+                                    <div style="font-weight: 700; font-size: 0.85rem; margin-bottom: 0.2rem;">{{ b.name }}</div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p style="color: var(--text-muted); font-size: 0.9rem; text-align: center; padding: 1rem;">No badges earned yet. Complete quizzes to unlock trophies!</p>
+                    {% endif %}
+                </div>
+
+                <div class="glass-card">
+                    <h3 style="margin-bottom: 1rem;">Quick Shortcuts</h3>
+                    <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                        <a href="{{ url_for('modules') }}" class="btn btn-secondary" style="justify-content: flex-start;">
+                            <i class="fa-solid fa-book" style="color: var(--emerald-primary);"></i> Environmental Modules
+                        </a>
+                        <a href="{{ url_for('leaderboard') }}" class="btn btn-secondary" style="justify-content: flex-start;">
+                            <i class="fa-solid fa-trophy" style="color: var(--warning);"></i> Global Leaderboard
+                        </a>
+                        <a href="{{ url_for('eco_tips') }}" class="btn btn-secondary" style="justify-content: flex-start;">
+                            <i class="fa-solid fa-lightbulb" style="color: var(--ocean-primary);"></i> Daily Eco Tips
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="{{ url_for('static', filename='js/confetti.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+</body>
+</html>

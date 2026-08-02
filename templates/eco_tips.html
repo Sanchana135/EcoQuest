@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Eco Tips – EcoQuest</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/responsive.css') }}">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="{{ url_for('index') }}" class="logo"><i class="fa-solid fa-leaf"></i> EcoQuest</a>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="{{ url_for('dashboard') }}" class="nav-link">Dashboard</a></li>
+                <li><a href="{{ url_for('modules') }}" class="nav-link">Modules</a></li>
+                <li><a href="{{ url_for('leaderboard') }}" class="nav-link">Leaderboard</a></li>
+                <li><a href="{{ url_for('eco_tips') }}" class="nav-link active">Eco Tips</a></li>
+            </ul>
+            <div class="nav-actions">
+                <button class="theme-toggle-btn" id="themeToggleBtn"><i class="fa-solid fa-sun" id="themeIcon"></i></button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="main-wrapper">
+        <div style="margin-bottom: 2rem; text-align: center;">
+            <span class="badge-pill badge-emerald">Daily Habits</span>
+            <h1 style="font-size: 2.5rem; margin-top: 0.5rem;">Daily Eco Tips & Actions</h1>
+            <p style="color: var(--text-secondary);">Turn environmental knowledge into daily habits. Complete actions to claim XP points!</p>
+        </div>
+
+        <div class="tips-grid">
+            {% for t in tips %}
+                {% set is_completed = t.id in completed_ids %}
+                <div class="glass-card tip-card">
+                    <div>
+                        <div class="tip-header">
+                            <div class="tip-icon">
+                                <i class="fa-solid {{ t.icon_class }}"></i>
+                            </div>
+                            <div>
+                                <span class="badge-pill badge-ocean">{{ t.category }}</span>
+                                <h3 style="font-size: 1.15rem; margin-top: 0.25rem;">{{ t.title }}</h3>
+                            </div>
+                        </div>
+                        <p style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.6; margin-bottom: 1.25rem;">
+                            {{ t.content }}
+                        </p>
+                    </div>
+
+                    <div style="display: flex; align-items: center; justify-content: space-between; border-top: 1px solid var(--glass-border); padding-top: 1rem;">
+                        <span style="font-weight: 700; color: var(--emerald-primary); font-size: 0.9rem;">+{{ t.xp_reward }} XP</span>
+                        {% if is_completed %}
+                            <button class="btn btn-secondary btn-sm" disabled style="padding: 0.4rem 1rem; font-size: 0.85rem;">
+                                <i class="fa-solid fa-circle-check"></i> Completed
+                            </button>
+                        {% else %}
+                            <button class="btn btn-primary claim-tip-btn" data-tip-id="{{ t.id }}" style="padding: 0.4rem 1rem; font-size: 0.85rem;">
+                                <i class="fa-solid fa-check"></i> Complete Action
+                            </button>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </main>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+</body>
+</html>

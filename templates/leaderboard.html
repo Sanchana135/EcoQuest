@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Global Leaderboard – EcoQuest</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/responsive.css') }}">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="{{ url_for('index') }}" class="logo"><i class="fa-solid fa-leaf"></i> EcoQuest</a>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="{{ url_for('dashboard') }}" class="nav-link">Dashboard</a></li>
+                <li><a href="{{ url_for('modules') }}" class="nav-link">Modules</a></li>
+                <li><a href="{{ url_for('leaderboard') }}" class="nav-link active">Leaderboard</a></li>
+                <li><a href="{{ url_for('badges') }}" class="nav-link">Badges</a></li>
+                <li><a href="{{ url_for('eco_tips') }}" class="nav-link">Eco Tips</a></li>
+            </ul>
+            <div class="nav-actions">
+                <button class="theme-toggle-btn" id="themeToggleBtn"><i class="fa-solid fa-sun" id="themeIcon"></i></button>
+                <button class="mobile-menu-toggle" id="mobileMenuBtn"><i class="fa-solid fa-bars"></i></button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="main-wrapper">
+        <div style="margin-bottom: 2rem; text-align: center;">
+            <span class="badge-pill badge-emerald">Top Sustainability Champions</span>
+            <h1 style="font-size: 2.5rem; margin-top: 0.5rem;">Global Leaderboard</h1>
+            <p style="color: var(--text-secondary);">Your Current Rank: <strong style="color: var(--emerald-primary);">#{{ current_user_rank }}</strong></p>
+        </div>
+
+        <!-- Top 3 Podium View -->
+        {% if top_three %}
+            <div class="podium-container">
+                <!-- Rank 2: Silver -->
+                {% if top_three | length >= 2 %}
+                    {% set r2 = top_three[1] %}
+                    <div class="podium-card rank-2-podium">
+                        <div class="podium-crown"><i class="fa-solid fa-crown"></i></div>
+                        <div class="avatar-circle" style="width: 55px; height: 55px; font-size: 1.5rem; margin: 0.5rem auto 0.75rem;">
+                            <i class="fa-solid {{ r2.avatar }}"></i>
+                        </div>
+                        <h3 style="font-size: 1.1rem; margin-bottom: 0.25rem;">{{ r2.username }}</h3>
+                        <span class="badge-pill badge-ocean" style="margin-bottom: 0.5rem;">Level {{ r2.level }}</span>
+                        <div style="font-weight: 800; font-size: 1.2rem; color: var(--emerald-primary);">{{ r2.xp }} XP</div>
+                        <div style="font-size: 0.8rem; color: var(--gold-coin); margin-top: 0.2rem;">🪙 {{ r2.coins or 50 }} Coins</div>
+                    </div>
+                {% endif %}
+
+                <!-- Rank 1: Gold Champion -->
+                {% if top_three | length >= 1 %}
+                    {% set r1 = top_three[0] %}
+                    <div class="podium-card rank-1-podium">
+                        <div class="podium-crown"><i class="fa-solid fa-crown"></i></div>
+                        <div class="avatar-circle" style="width: 68px; height: 68px; font-size: 1.8rem; margin: 0.5rem auto 0.75rem; box-shadow: 0 0 25px rgba(245, 158, 11, 0.6);">
+                            <i class="fa-solid {{ r1.avatar }}"></i>
+                        </div>
+                        <span class="badge-pill badge-coin" style="margin-bottom: 0.4rem;">🏆 CHAMPION</span>
+                        <h3 style="font-size: 1.3rem; margin-bottom: 0.25rem;">{{ r1.username }}</h3>
+                        <span class="badge-pill badge-ocean" style="margin-bottom: 0.5rem;">Level {{ r1.level }}</span>
+                        <div style="font-weight: 800; font-size: 1.4rem; color: var(--emerald-primary);">{{ r1.xp }} XP</div>
+                        <div style="font-size: 0.85rem; color: var(--gold-coin); margin-top: 0.2rem;">🪙 {{ r1.coins or 50 }} Coins</div>
+                    </div>
+                {% endif %}
+
+                <!-- Rank 3: Bronze -->
+                {% if top_three | length >= 3 %}
+                    {% set r3 = top_three[2] %}
+                    <div class="podium-card rank-3-podium">
+                        <div class="podium-crown"><i class="fa-solid fa-crown"></i></div>
+                        <div class="avatar-circle" style="width: 50px; height: 50px; font-size: 1.3rem; margin: 0.5rem auto 0.75rem;">
+                            <i class="fa-solid {{ r3.avatar }}"></i>
+                        </div>
+                        <h3 style="font-size: 1.05rem; margin-bottom: 0.25rem;">{{ r3.username }}</h3>
+                        <span class="badge-pill badge-ocean" style="margin-bottom: 0.5rem;">Level {{ r3.level }}</span>
+                        <div style="font-weight: 800; font-size: 1.1rem; color: var(--emerald-primary);">{{ r3.xp }} XP</div>
+                        <div style="font-size: 0.8rem; color: var(--gold-coin); margin-top: 0.2rem;">🪙 {{ r3.coins or 50 }} Coins</div>
+                    </div>
+                {% endif %}
+            </div>
+        {% endif %}
+
+        <!-- Detailed Leaderboard Table for Ranks -->
+        <div class="glass-card" style="max-width: 950px; margin: 0 auto;">
+            <div style="overflow-x: auto;">
+                <table class="leaderboard-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 80px;">Rank</th>
+                            <th>Student Warrior</th>
+                            <th>Level</th>
+                            <th>Streak</th>
+                            <th>Coins</th>
+                            <th>Badges</th>
+                            <th style="text-align: right;">Total XP</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for u in top_users %}
+                            <tr {% if session.user_id == u.id %}style="background: rgba(16, 185, 129, 0.15); border-color: var(--emerald-primary);"{% endif %}>
+                                <td>
+                                    {% if loop.index == 1 %}
+                                        <span class="rank-badge rank-1"><i class="fa-solid fa-crown"></i></span>
+                                    {% elif loop.index == 2 %}
+                                        <span class="rank-badge rank-2">2</span>
+                                    {% elif loop.index == 3 %}
+                                        <span class="rank-badge rank-3">3</span>
+                                    {% else %}
+                                        <span class="rank-badge rank-other">{{ loop.index }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                        <div class="avatar-circle" style="width: 36px; height: 36px;">
+                                            <i class="fa-solid {{ u.avatar }}"></i>
+                                        </div>
+                                        <div>
+                                            <div style="font-weight: 700; color: var(--text-primary);">
+                                                {{ u.username }}
+                                                {% if session.user_id == u.id %}
+                                                    <span class="badge-pill badge-emerald" style="font-size: 0.7rem; padding: 0.1rem 0.5rem;">YOU</span>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td><span class="badge-pill badge-ocean">Lvl {{ u.level }}</span></td>
+                                <td><span class="badge-pill badge-streak"><i class="fa-solid fa-fire"></i> {{ u.streak_count or 1 }}d</span></td>
+                                <td><span style="color: var(--gold-coin); font-weight: 700;">🪙 {{ u.coins or 50 }}</span></td>
+                                <td><i class="fa-solid fa-award" style="color: var(--warning);"></i> {{ u.badge_count }}</td>
+                                <td style="text-align: right; font-weight: 800; font-size: 1.1rem; color: var(--emerald-primary);">
+                                    {{ u.xp }} XP
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>

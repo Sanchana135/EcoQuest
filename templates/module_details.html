@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ module.title }} – EcoQuest</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/responsive.css') }}">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="{{ url_for('index') }}" class="logo"><i class="fa-solid fa-leaf"></i> EcoQuest</a>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="{{ url_for('dashboard') }}" class="nav-link">Dashboard</a></li>
+                <li><a href="{{ url_for('modules') }}" class="nav-link active">Modules</a></li>
+                <li><a href="{{ url_for('leaderboard') }}" class="nav-link">Leaderboard</a></li>
+            </ul>
+            <div class="nav-actions">
+                <button class="theme-toggle-btn" id="themeToggleBtn"><i class="fa-solid fa-sun" id="themeIcon"></i></button>
+                <button class="mobile-menu-toggle" id="mobileMenuBtn"><i class="fa-solid fa-bars"></i></button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="main-wrapper">
+        <div style="margin-bottom: 1.5rem;">
+            <a href="{{ url_for('modules') }}" class="btn btn-secondary" style="padding: 0.4rem 1rem; font-size: 0.85rem;">
+                <i class="fa-solid fa-arrow-left"></i> Back to Modules
+            </a>
+        </div>
+
+        <div class="glass-card" style="margin-bottom: 2rem;">
+            <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+                <div>
+                    <span class="badge-pill badge-ocean">{{ module.category }}</span>
+                    <h1 style="font-size: 2.2rem; margin: 0.5rem 0 0.25rem;">{{ module.title }}</h1>
+                    <p style="color: var(--text-secondary);">{{ module.description }}</p>
+                </div>
+                <div style="text-align: right;">
+                    <div style="font-size: 1.2rem; font-weight: 700; color: var(--emerald-primary);">+{{ module.xp_reward }} XP</div>
+                    {% if passed %}
+                        <span class="badge-pill badge-emerald" style="margin-top: 0.5rem; display: inline-block;">Passed ({{ best_score }}%)</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Lessons Sections -->
+        <section style="margin-bottom: 3rem;">
+            <h2 style="margin-bottom: 1.5rem;"><i class="fa-solid fa-book-open-reader" style="color: var(--emerald-primary);"></i> Module Lessons</h2>
+            {% for lesson in lessons %}
+                <div class="glass-card" style="margin-bottom: 1.5rem;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; border-bottom: 1px solid var(--glass-border); padding-bottom: 0.75rem;">
+                        <h3 style="font-size: 1.3rem;">Lesson {{ lesson.order_num }}: {{ lesson.title }}</h3>
+                        <span style="font-size: 0.85rem; color: var(--text-muted);"><i class="fa-regular fa-clock"></i> {{ lesson.reading_time }} min read</span>
+                    </div>
+                    <div style="color: var(--text-secondary); line-height: 1.8; font-size: 1rem;">
+                        {{ lesson.content | safe }}
+                    </div>
+                </div>
+            {% endfor %}
+        </section>
+
+        <!-- Quiz Trigger Section -->
+        {% if quiz %}
+            <div class="glass-card" style="text-align: center; padding: 3rem 2rem; background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(2, 132, 199, 0.15)); border: 1px solid var(--emerald-primary);">
+                <i class="fa-solid fa-clipboard-check" style="font-size: 3rem; color: var(--emerald-primary); margin-bottom: 1rem;"></i>
+                <h2>Ready for the Mastery Challenge?</h2>
+                <p style="color: var(--text-secondary); max-width: 550px; margin: 0.5rem auto 1.5rem;">
+                    Test your understanding in a timed quiz. Score at least {{ quiz.pass_score }}% to pass, earn +{{ quiz.xp_reward }} XP, and unlock your official certificate.
+                </p>
+                <a href="{{ url_for('quiz', quiz_id=quiz.id) }}" class="btn btn-primary" style="padding: 1rem 2.5rem; font-size: 1.1rem;">
+                    <i class="fa-solid fa-play"></i> Start Quiz Challenge ({{ quiz.time_limit_sec // 60 }} mins)
+                </a>
+            </div>
+        {% endif %}
+    </main>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel – EcoQuest</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/responsive.css') }}">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="{{ url_for('index') }}" class="logo"><i class="fa-solid fa-shield-halved"></i> EcoQuest Admin</a>
+            <div class="nav-actions">
+                <button class="theme-toggle-btn" id="themeToggleBtn"><i class="fa-solid fa-sun" id="themeIcon"></i></button>
+                <a href="{{ url_for('logout') }}" class="btn btn-secondary"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="main-wrapper">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="alert-container">
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}"><i class="fa-solid fa-circle-info"></i> {{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <div style="margin-bottom: 2rem;">
+            <h1>Administrator Dashboard</h1>
+            <p style="color: var(--text-secondary);">Manage platform learning content, monitor user statistics, and configure modules.</p>
+        </div>
+
+        <!-- Admin Overview Metrics -->
+        <section class="dashboard-grid" style="margin-bottom: 2.5rem;">
+            <div class="col-6">
+                <div class="glass-card stat-card">
+                    <div class="stat-icon"><i class="fa-solid fa-users"></i></div>
+                    <div>
+                        <div class="stat-value">{{ total_users }}</div>
+                        <div class="stat-label">Total Users</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6">
+                <div class="glass-card stat-card">
+                    <div class="stat-icon" style="background: rgba(2, 132, 199, 0.15); color: var(--ocean-primary);">
+                        <i class="fa-solid fa-book-open"></i>
+                    </div>
+                    <div>
+                        <div class="stat-value">{{ total_modules }}</div>
+                        <div class="stat-label">Active Modules</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Admin Actions Grid -->
+        <section class="dashboard-grid">
+            <!-- Add New Module Form -->
+            <div class="col-6">
+                <div class="glass-card">
+                    <h3 style="margin-bottom: 1.25rem;"><i class="fa-solid fa-plus-circle" style="color: var(--emerald-primary);"></i> Add New Learning Module</h3>
+                    <form action="{{ url_for('admin_add_module') }}" method="POST">
+                        <div style="margin-bottom: 1rem;">
+                            <label style="display: block; margin-bottom: 0.4rem; font-weight: 600; color: var(--text-secondary);">Module Title</label>
+                            <input type="text" name="title" required style="width: 100%; padding: 0.75rem 1rem; background: rgba(255,255,255,0.06); border: 1px solid var(--glass-border); border-radius: var(--radius-md); color: var(--text-primary);">
+                        </div>
+
+                        <div style="margin-bottom: 1rem;">
+                            <label style="display: block; margin-bottom: 0.4rem; font-weight: 600; color: var(--text-secondary);">Category</label>
+                            <input type="text" name="category" placeholder="e.g. Biodiversity & Ecosystems" required style="width: 100%; padding: 0.75rem 1rem; background: rgba(255,255,255,0.06); border: 1px solid var(--glass-border); border-radius: var(--radius-md); color: var(--text-primary);">
+                        </div>
+
+                        <div style="margin-bottom: 1rem;">
+                            <label style="display: block; margin-bottom: 0.4rem; font-weight: 600; color: var(--text-secondary);">FontAwesome Icon Class</label>
+                            <input type="text" name="image_icon" value="fa-leaf" required style="width: 100%; padding: 0.75rem 1rem; background: rgba(255,255,255,0.06); border: 1px solid var(--glass-border); border-radius: var(--radius-md); color: var(--text-primary);">
+                        </div>
+
+                        <div style="margin-bottom: 1.25rem;">
+                            <label style="display: block; margin-bottom: 0.4rem; font-weight: 600; color: var(--text-secondary);">Description</label>
+                            <textarea name="description" rows="3" required style="width: 100%; padding: 0.75rem 1rem; background: rgba(255,255,255,0.06); border: 1px solid var(--glass-border); border-radius: var(--radius-md); color: var(--text-primary); resize: vertical;"></textarea>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary" style="width: 100%;">
+                            <i class="fa-solid fa-save"></i> Save Module
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Recent Users Table -->
+            <div class="col-6">
+                <div class="glass-card">
+                    <h3 style="margin-bottom: 1.25rem;"><i class="fa-solid fa-user-gear"></i> Registered Students</h3>
+                    <div style="overflow-x: auto;">
+                        <table class="leaderboard-table">
+                            <thead>
+                                <tr>
+                                    <th>User</th>
+                                    <th>Role</th>
+                                    <th>Level</th>
+                                    <th>XP</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for u in recent_users %}
+                                    <tr>
+                                        <td>
+                                            <div style="font-weight: 600;">{{ u.username }}</div>
+                                            <div style="font-size: 0.8rem; color: var(--text-muted);">{{ u.email }}</div>
+                                        </td>
+                                        <td>
+                                            {% if u.role == 'admin' %}
+                                                <span class="badge-pill badge-ocean">ADMIN</span>
+                                            {% else %}
+                                                <span class="badge-pill badge-emerald">STUDENT</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>Lvl {{ u.level }}</td>
+                                        <td style="font-weight: 700; color: var(--emerald-primary);">{{ u.xp }} XP</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>

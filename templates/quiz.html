@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ quiz.title }} – EcoQuest</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/responsive.css') }}">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="{{ url_for('index') }}" class="logo"><i class="fa-solid fa-leaf"></i> EcoQuest</a>
+            <div class="nav-actions">
+                <button class="theme-toggle-btn" id="themeToggleBtn"><i class="fa-solid fa-sun" id="themeIcon"></i></button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="main-wrapper">
+        <div class="quiz-container">
+            <!-- Quiz Header Bar with Timer -->
+            <div class="quiz-header">
+                <div>
+                    <span class="badge-pill badge-ocean">{{ module.title }}</span>
+                    <h2 style="font-size: 1.6rem; margin-top: 0.25rem;">{{ quiz.title }}</h2>
+                </div>
+                <div class="timer-box">
+                    <i class="fa-solid fa-stopwatch"></i>
+                    <span id="timerDisplay">00:00</span>
+                </div>
+            </div>
+
+            <input type="hidden" id="timeLimitSec" value="{{ quiz.time_limit_sec }}">
+
+            <form action="{{ url_for('submit_quiz', quiz_id=quiz.id) }}" method="POST" id="quizForm">
+                {% for q in questions %}
+                    <div class="glass-card question-card">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                            <span class="badge-pill badge-emerald">Question {{ loop.index }} of {{ questions | length }}</span>
+                            <span style="font-size: 0.85rem; color: var(--warning); font-weight: 700;">{{ q.points }} Points</span>
+                        </div>
+                        <h3 class="question-title">{{ q.question_text }}</h3>
+
+                        <div class="options-group">
+                            <label class="option-label">
+                                <input type="radio" name="q_{{ q.id }}" value="A">
+                                <div class="option-indicator">A</div>
+                                <div>{{ q.option_a }}</div>
+                            </label>
+
+                            <label class="option-label">
+                                <input type="radio" name="q_{{ q.id }}" value="B">
+                                <div class="option-indicator">B</div>
+                                <div>{{ q.option_b }}</div>
+                            </label>
+
+                            <label class="option-label">
+                                <input type="radio" name="q_{{ q.id }}" value="C">
+                                <div class="option-indicator">C</div>
+                                <div>{{ q.option_c }}</div>
+                            </label>
+
+                            <label class="option-label">
+                                <input type="radio" name="q_{{ q.id }}" value="D">
+                                <div class="option-indicator">D</div>
+                                <div>{{ q.option_d }}</div>
+                            </label>
+                        </div>
+                    </div>
+                {% endfor %}
+
+                <div style="text-align: center; margin-top: 2rem;">
+                    <button type="submit" class="btn btn-primary" style="padding: 1rem 3rem; font-size: 1.1rem;">
+                        <i class="fa-solid fa-paper-plane"></i> Submit Answers
+                    </button>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/quiz.js') }}"></script>
+</body>
+</html>

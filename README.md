@@ -54,6 +54,8 @@ npm run dev
 ## Live Demo
 
 https://sanchana135.pythonanywhere.com/
+## Prototype
+https://drive.google.com/file/d/1NI6A56hrMm8anTJrjgjk3QymoG13o-il/view?usp=drive_link
 
 ## Future Enhancements
 
